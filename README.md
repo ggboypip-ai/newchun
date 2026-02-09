@@ -1,1 +1,1 @@
-**[Play the game](https://你的用户名.github.io/newchun/chunjie.html)**
+**[Play the game](https://你的用户名.github.io/newchun/index.html)
