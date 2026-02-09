@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>此刻的春节 · 放鞭炮节奏点击</title>
+  <style>
+    :root{
+      font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
+      --bg1:#b91c1c; --bg2:#7f1d1d; --bg3:#2a0707;
+      --paper:#fff7ed; --muted:rgba(255,247,237,.72);
+      --panel:rgba(255,247,237,.10); --border:rgba(255,247,237,.22);
+      --gold:#fbbf24; --gold2:#f59e0b;
+    }
+    body{
+      margin:0; color:var(--paper);
+      background:
+        radial-gradient(circle at 10% 20%, rgba(245,158,11,.18) 0%, rgba(0,0,0,0) 40%),
+        radial-gradient(circle at 90% 22%, rgba(251,191,36,.14) 0%, rgba(0,0,0,0) 44%),
+        radial-gradient(circle at 30% 92%, rgba(245,158,11,.12) 0%, rgba(0,0,0,0) 48%),
+        linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 56%, var(--bg3) 100%);
+      overflow:hidden;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .wrap{
+      max-width:760px; margin:0 auto; padding:14px;
+      min-height:100vh; display:flex; position:relative; z-index:1;
+    }
+    .card{
+      width:100%; margin:auto;
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:16px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.35);
+      position:relative; overflow:hidden;
+      backdrop-filter: blur(6px);
+    }
+    .card:before,.card:after{
+      content:""; position:absolute; width:280px; height:280px; border-radius:999px;
+      filter:blur(18px); opacity:.35; pointer-events:none;
+    }
+    .card:before{ background:rgba(245,158,11,.55); top:-160px; left:-140px; }
+    .card:after{ background:rgba(251,191,36,.45); bottom:-170px; right:-160px; }
+
+    h1,h2{ margin:0 0 10px; line-height:1.15; position:relative; z-index:2; }
+    p{ margin:8px 0; color:rgba(255,247,237,.92); position:relative; z-index:2; }
+    .muted{ color:var(--muted); font-size:13px; position:relative; z-index:2; }
+    .row{ display:flex; justify-content:space-between; align-items:center; gap:10px; position:relative; z-index:2; flex-wrap:wrap;}
+    .badge{
+      display:inline-flex; gap:8px; align-items:center; padding:7px 10px;
+      border-radius:999px; background:rgba(255,247,237,.10);
+      border:1px solid rgba(255,247,237,.18); font-size:12px;
+    }
+    .btns{ display:grid; gap:10px; margin-top:12px; position:relative; z-index:2; }
+    button{
+      appearance:none; border:0; border-radius:14px; padding:14px 14px;
+      font-size:16px; font-weight:700; cursor:pointer;
+      background:rgba(255,247,237,.14); color:var(--paper);
+      border:1px solid rgba(255,247,237,.22);
+      text-align:left;
+    }
+    button:active{ transform:scale(.99); background:rgba(255,247,237,.18); }
+
+    .toolbar{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; position:relative; z-index:2;}
+    .small{ padding:10px 12px; border-radius:12px; font-size:14px; font-weight:700; }
+
+    /* ===== 春节场景装饰（灯笼/春联/火花粒子）===== */
+    .scene{ position:fixed; inset:0; pointer-events:none; z-index:0; }
+    .sparks{
+      position:absolute; inset:0; opacity:.45;
+      background-image:
+        radial-gradient(circle at 10% 30%, rgba(251,191,36,.35) 0 2px, transparent 3px),
+        radial-gradient(circle at 65% 18%, rgba(245,158,11,.35) 0 2px, transparent 3px),
+        radial-gradient(circle at 82% 62%, rgba(251,191,36,.28) 0 2px, transparent 3px),
+        radial-gradient(circle at 30% 74%, rgba(245,158,11,.28) 0 2px, transparent 3px),
+        radial-gradient(circle at 50% 50%, rgba(251,191,36,.22) 0 2px, transparent 3px);
+      animation: sparkle 6.5s ease-in-out infinite;
+    }
+    @keyframes sparkle{0%,100%{transform:translateY(0);opacity:.40}50%{transform:translateY(-10px);opacity:.60}}
+
+    .lantern{
+      position:absolute; top:-8px; width:92px; height:150px;
+      filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+      opacity:.95; transform-origin: top center;
+      animation: sway 4.6s ease-in-out infinite;
+    }
+    .lantern.l1{ left:10px; animation-duration:4.8s; }
+    .lantern.l2{ right:10px; animation-duration:5.2s; animation-direction:reverse; }
+    @keyframes sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+
+    .couplet{
+      position:absolute; top:120px; width:58px; height:56vh;
+      background: linear-gradient(180deg, rgba(185,28,28,.96), rgba(127,29,29,.88));
+      border:1px solid rgba(255,247,237,.22);
+      border-radius:14px;
+      box-shadow: 0 14px 30px rgba(0,0,0,.25);
+      opacity:.92;
+    }
+    .couplet:before{ content:""; position:absolute; inset:10px; border:1px dashed rgba(251,191,36,.55); border-radius:10px; }
+    .couplet.left{ left:10px; }
+    .couplet.right{ right:10px; }
+    .couplet .txt{
+      position:absolute; inset:18px 10px;
+      writing-mode: vertical-rl;
+      font-weight:800; letter-spacing:4px;
+      color: rgba(255,247,237,.92); font-size:16px;
+    }
+    .banner{
+      position:absolute; top:88px; left:50%; transform:translateX(-50%);
+      padding:10px 16px; border-radius:999px;
+      background: rgba(255,247,237,.10);
+      border:1px solid rgba(255,247,237,.20);
+      backdrop-filter: blur(4px);
+      box-shadow: 0 10px 26px rgba(0,0,0,.22);
+      font-weight:900; letter-spacing:2px;
+      color: rgba(255,247,237,.95); opacity:.9;
+    }
+    @media (max-width: 520px){ .couplet{display:none} .banner{top:70px} }
+
+    /* ===== 游戏舞台 ===== */
+    .stage{
+      margin-top:10px;
+      background: rgba(0,0,0,.10);
+      border:1px solid rgba(255,247,237,.14);
+      border-radius:16px;
+      padding:12px;
+      position:relative; z-index:2;
+    }
+    canvas{
+      width:100%;
+      height:360px;
+      display:block;
+      border-radius:14px;
+      background: rgba(255,247,237,.06);
+      border:1px solid rgba(255,247,237,.12);
+    }
+    @media (max-width: 520px){
+      canvas{ height:420px; }
+    }
+
+    .hud{
+      display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      margin:10px 0 0; position:relative; z-index:2;
+    }
+    .hud .box{
+      padding:8px 10px; border-radius:12px;
+      background: rgba(255,247,237,.08);
+      border: 1px solid rgba(255,247,237,.14);
+      font-size:13px;
+    }
+    .big{
+      font-size:18px; font-weight:900;
+    }
+
+    /* confetti */
+    .confetti{ position:fixed; inset:0; pointer-events:none; z-index:50; overflow:hidden; }
+    .confetti i{ position:absolute; top:-10px; width:10px; height:14px; border-radius:3px; opacity:.9; animation: fall 1.2s linear forwards; }
+    @keyframes fall{ to{ transform: translateY(110vh) rotate(120deg); opacity:.95 } }
+
+    textarea{
+      width:100%; min-height:120px; margin-top:10px; padding:12px;
+      border-radius:12px; background:rgba(255,247,237,.10);
+      border:1px solid rgba(255,247,237,.20); color:rgba(255,247,237,.92);
+      resize:vertical; box-sizing:border-box; outline:none;
+      position:relative; z-index:2;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="scene" aria-hidden="true">
+    <div class="sparks"></div>
+
+    <svg class="lantern l1" viewBox="0 0 120 190">
+      <path d="M60 0 C58 12,58 12,60 24" stroke="rgba(255,247,237,.7)" stroke-width="3" fill="none"/>
+      <circle cx="60" cy="28" r="9" fill="rgba(251,191,36,.75)" stroke="rgba(255,247,237,.35)"/>
+      <path d="M35 40 C20 70,20 120,35 150 C50 175,70 175,85 150 C100 120,100 70,85 40 C70 20,50 20,35 40Z"
+            fill="rgba(185,28,28,.96)" stroke="rgba(255,247,237,.28)" stroke-width="2"/>
+      <path d="M45 48 C35 74,35 116,45 142" stroke="rgba(251,191,36,.28)" stroke-width="3" fill="none"/>
+      <path d="M75 48 C85 74,85 116,75 142" stroke="rgba(251,191,36,.28)" stroke-width="3" fill="none"/>
+      <rect x="44" y="148" width="32" height="14" rx="6" fill="rgba(251,191,36,.75)" stroke="rgba(255,247,237,.25)"/>
+    </svg>
+
+    <svg class="lantern l2" viewBox="0 0 120 190">
+      <path d="M60 0 C58 12,58 12,60 24" stroke="rgba(255,247,237,.7)" stroke-width="3" fill="none"/>
+      <circle cx="60" cy="28" r="9" fill="rgba(251,191,36,.75)" stroke="rgba(255,247,237,.35)"/>
+      <path d="M35 40 C20 70,20 120,35 150 C50 175,70 175,85 150 C100 120,100 70,85 40 C70 20,50 20,35 40Z"
+            fill="rgba(185,28,28,.96)" stroke="rgba(255,247,237,.28)" stroke-width="2"/>
+      <path d="M45 48 C35 74,35 116,45 142" stroke="rgba(251,191,36,.28)" stroke-width="3" fill="none"/>
+      <path d="M75 48 C85 74,85 116,75 142" stroke="rgba(251,191,36,.28)" stroke-width="3" fill="none"/>
+      <rect x="44" y="148" width="32" height="14" rx="6" fill="rgba(251,191,36,.75)" stroke="rgba(255,247,237,.25)"/>
+    </svg>
+
+    <div class="banner">放鞭炮 · 年味拉满</div>
+    <div class="couplet left"><div class="txt">爆竹声中一岁除</div></div>
+    <div class="couplet right"><div class="txt">春风送暖入屠苏</div></div>
+  </div>
+
+  <div class="wrap">
+    <div class="card" id="app"></div>
+  </div>
+
+  <script>
+    // =============================
+    // 音频：节拍 + 爆竹音效（不依赖外部资源）
+    // =============================
+    const AudioSys = (() => {
+      let ctx=null, master=null, on=false;
+
+      function init(){
+        if(ctx) return;
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        master = ctx.createGain();
+        master.gain.value = 0.18;
+        master.connect(ctx.destination);
+      }
+
+      function setOn(v){
+        init();
+        on = v;
+        if(ctx.state === "suspended") ctx.resume();
+      }
+
+      function toggle(){
+        setOn(!on);
+        return on;
+      }
+
+      function clickSound(t){
+        if(!on) return;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type="square";
+        osc.frequency.setValueAtTime(900, t);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.18, t+0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t+0.05);
+        osc.connect(g); g.connect(master);
+        osc.start(t); osc.stop(t+0.06);
+      }
+
+      function firecracker(t, intensity=1){
+        if(!on) return;
+        // 噪声爆响 + 短促包络
+        const bufferSize = Math.floor(ctx.sampleRate * 0.12);
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for(let i=0;i<bufferSize;i++){
+          const env = Math.exp(-i/(ctx.sampleRate*0.02));
+          data[i] = (Math.random()*2-1) * env * (0.9 + 0.2*Math.random());
+        }
+        const src = ctx.createBufferSource();
+        src.buffer = buffer;
+
+        const bp = ctx.createBiquadFilter();
+        bp.type="bandpass";
+        bp.frequency.setValueAtTime(1400, t);
+        bp.Q.setValueAtTime(0.8, t);
+
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.35*intensity, t+0.005);
+        g.gain.exponentialRampToValueAtTime(0.0001, t+0.11);
+
+        src.connect(bp); bp.connect(g); g.connect(master);
+        src.start(t); src.stop(t+0.12);
+      }
+
+      function isOn(){ return on; }
+      function time(){ return ctx ? ctx.currentTime : 0; }
+
+      return { init, setOn, toggle, isOn, clickSound, firecracker, time };
+    })();
+
+    // =============================
+    // 游戏配置
+    // =============================
+    const CFG = {
+      bpm: 100,
+      durationSec: 45,            // 一局 45 秒
+      perfectMs: 80,
+      goodMs: 150,
+      leadBeats: 2,               // 提前生成可视圈（2拍提前）
+    };
+
+    // 生成简单 beatmap：以 1/2 拍为主，偶尔空拍
+    function generateBeatTimes(startTimeSec){
+      const beat = 60 / CFG.bpm;       // 1拍秒数
+      const step = beat/2;             // 半拍
+      const totalSteps = Math.floor(CFG.durationSec / step);
+      const times = [];
+      for(let i=0;i<totalSteps;i++){
+        // 规则：每 4 个 step 做个小节，制造节奏感
+        const inBar = i % 8;
+        let spawn = false;
+        if(inBar === 0 || inBar === 2 || inBar === 4 || inBar === 6) spawn = true;     // 稳稳四连
+        // 偶尔加花
+        if(Math.random() < 0.10 && (inBar===1 || inBar===3 || inBar===5 || inBar===7)) spawn = true;
+        // 偶尔空一下
+        if(Math.random() < 0.06) spawn = false;
+        if(spawn) times.push(startTimeSec + i*step);
+      }
+      return times;
+    }
+
+    // =============================
+    // 画布 & 粒子
+    // =============================
+    function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+
+    class Particle{
+      constructor(x,y,vx,vy,life,color){
+        this.x=x; this.y=y; this.vx=vx; this.vy=vy;
+        this.life=life; this.max=life; this.color=color;
+      }
+      step(dt){
+        this.vy += 680*dt;
+        this.x += this.vx*dt;
+        this.y += this.vy*dt;
+        this.life -= dt;
+      }
+      draw(ctx){
+        const alpha = clamp(this.life/this.max,0,1);
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, 3, 3);
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    // =============================
+    // UI 渲染
+    // =============================
+    const app = document.getElementById("app");
+    let state = "menu"; // menu | play | result
+    let canvas, ctx, W, H, dpr;
+
+    // 游戏状态
+    let startAt = 0;         // Audio time when gameplay starts
+    let beatTimes = [];
+    let nextBeatIndex = 0;
+
+    let score = 0;
+    let combo = 0;
+    let maxCombo = 0;
+    let perfect = 0, good = 0, miss = 0;
+
+    let particles = [];
+    let lastFrame = 0;
+    let running = false;
+
+    function popConfetti(n=40){
+      const layer = document.createElement("div");
+      layer.className="confetti";
+      const colors=["rgba(251,191,36,.95)","rgba(245,158,11,.95)","rgba(255,247,237,.90)","rgba(185,28,28,.85)"];
+      for(let i=0;i<n;i++){
+        const p=document.createElement("i");
+        p.style.left=(Math.random()*100)+"vw";
+        p.style.animationDelay=(Math.random()*0.25)+"s";
+        p.style.animationDuration=(0.9+Math.random()*0.7)+"s";
+        const size=8+Math.random()*10;
+        p.style.width=(size*0.7)+"px";
+        p.style.height=size+"px";
+        p.style.background=colors[Math.floor(Math.random()*colors.length)];
+        layer.appendChild(p);
+      }
+      document.body.appendChild(layer);
+      setTimeout(()=>layer.remove(), 1800);
+    }
+
+    function vibrate(ms){
+      try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){}
+    }
+
+    function renderMenu(){
+      state="menu";
+      running=false;
+      app.innerHTML = `
+        <div class="row">
+          <div class="badge">🧨 节奏点击</div>
+          <div class="badge">🏮 春节氛围</div>
+          <div class="badge">⏱️ ${CFG.durationSec}s</div>
+        </div>
+        <h1 style="margin-top:12px;">此刻的春节 · 放鞭炮</h1>
+        <p>跟着节奏点火引爆。越准、连击越高，年味越“拉满”。</p>
+        <div class="stage">
+          <p class="muted">操作：</p>
+          <p class="muted">• 手机：点击屏幕任意位置（或点鞭炮）</p>
+          <p class="muted">• 电脑：空格 / 鼠标点击</p>
+          <p class="muted">提示：音乐/音效需点击后才能播放（浏览器规则）。</p>
+          <div class="btns">
+            <button id="startBtn">▶ 开始放鞭炮</button>
+          </div>
+          <div class="toolbar">
+            <button class="small" id="audioBtn">🎵 音效：${AudioSys.isOn() ? "开" : "关"}</button>
+            <button class="small" id="howBtn">📌 玩法说明</button>
+          </div>
+        </div>
+        <p class="muted" style="margin-top:10px;">作者签名：愿这一刻，被好好记住。</p>
+      `;
+
+      document.getElementById("startBtn").onclick = async () => {
+        AudioSys.init();
+        AudioSys.setOn(true);
+        renderPlay();
+      };
+      document.getElementById("audioBtn").onclick = () => {
+        const on = AudioSys.toggle();
+        document.getElementById("audioBtn").textContent = `🎵 音效：${on ? "开" : "关"}`;
+      };
+      document.getElementById("howBtn").onclick = () => {
+        alert("玩法：点火圈缩到命中线时点击/空格。\nPerfect（更准）> Good > Miss。\n连击越高，年味越足！");
+      };
+    }
+
+    function renderPlay(){
+      state="play";
+      score=0; combo=0; maxCombo=0; perfect=0; good=0; miss=0;
+      particles=[]; nextBeatIndex=0;
+
+      app.innerHTML = `
+        <div class="row">
+          <div class="badge">🧨 放鞭炮进行中</div>
+          <div class="badge" id="timeBadge">⏱️ ${CFG.durationSec}s</div>
+          <div class="badge" id="judgeBadge">Ready</div>
+        </div>
+
+        <div class="stage">
+          <canvas id="c"></canvas>
+          <div class="hud">
+            <div class="box"><div class="muted">Score</div><div class="big" id="scoreV">0</div></div>
+            <div class="box"><div class="muted">Combo</div><div class="big" id="comboV">0</div></div>
+            <div class="box"><div class="muted">Accuracy</div><div class="big" id="accV">0%</div></div>
+          </div>
+
+          <div class="toolbar">
+            <button class="small" id="audioBtn">🎵 音效：${AudioSys.isOn() ? "开" : "关"}</button>
+            <button class="small" id="quitBtn">⏹ 结束</button>
+          </div>
+
+          <p class="muted">点击屏幕任意位置或按空格。越准越爽。</p>
+        </div>
+      `;
+
+      canvas = document.getElementById("c");
+      ctx = canvas.getContext("2d");
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas, { passive:true });
+
+      document.getElementById("audioBtn").onclick = () => {
+        const on = AudioSys.toggle();
+        document.getElementById("audioBtn").textContent = `🎵 音效：${on ? "开" : "关"}`;
+      };
+      document.getElementById("quitBtn").onclick = () => endGame();
+
+      // 输入
+      const onHit = () => handleHit();
+      window.onkeydown = (e) => { if(e.code==="Space"){ e.preventDefault(); onHit(); } };
+      canvas.onclick = onHit;
+      canvas.ontouchstart = (e) => { e.preventDefault(); onHit(); };
+
+      // 开局定时：给一点点缓冲
+      startAt = AudioSys.time() + 0.75;
+      beatTimes = generateBeatTimes(startAt);
+      running = true;
+      lastFrame = performance.now();
+      requestAnimationFrame(loop);
+    }
+
+    function resizeCanvas(){
+      if(!canvas) return;
+      dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      W = Math.floor(rect.width * dpr);
+      H = Math.floor(rect.height * dpr);
+      canvas.width = W; canvas.height = H;
+    }
+
+    function nowAudio(){ return AudioSys.time(); }
+
+    function calcAcc(){
+      const total = perfect + good + miss;
+      if(total<=0) return 0;
+      const pts = perfect*1 + good*0.6 + miss*0;
+      return Math.round((pts/total)*100);
+    }
+
+    function setJudge(text){
+      const el = document.getElementById("judgeBadge");
+      if(el) el.textContent = text;
+    }
+
+    function updateHUD(){
+      const s = document.getElementById("scoreV");
+      const c = document.getElementById("comboV");
+      const a = document.getElementById("accV");
+      if(s) s.textContent = String(score);
+      if(c) c.textContent = String(combo);
+      if(a) a.textContent = `${calcAcc()}%`;
+    }
+
+    function handleHit(){
+      if(!running) return;
+      const t = nowAudio();
+
+      // 找最近未判定的 beat（以 nextBeatIndex 附近为主）
+      let bestIdx = -1;
+      let bestDt = Infinity;
+
+      // 检查 nextBeatIndex 及其后一个（防止漏判）
+      for(let k=0;k<3;k++){
+        const i = nextBeatIndex + k;
+        if(i < 0 || i >= beatTimes.length) continue;
+        const dt = Math.abs((t - beatTimes[i]) * 1000);
+        if(dt < bestDt){
+          bestDt = dt;
+          bestIdx = i;
+        }
+      }
+
+      if(bestIdx === -1){
+        // 没有节拍（理论上不会）
+        registerMiss("Miss");
+        return;
+      }
+
+      if(bestDt <= CFG.perfectMs){
+        registerHit("Perfect", bestIdx, 120);
+      }else if(bestDt <= CFG.goodMs){
+        registerHit("Good", bestIdx, 70);
+      }else{
+        registerMiss("Miss");
+      }
+    }
+
+    function registerHit(type, beatIdx, base){
+      // 把这个 beat 视为已判定：推进 nextBeatIndex
+      if(beatIdx === nextBeatIndex) nextBeatIndex++;
+      else if(beatIdx > nextBeatIndex) nextBeatIndex = beatIdx + 1;
+
+      if(type==="Perfect"){ perfect++; AudioSys.firecracker(nowAudio()+0.01, 1.0); vibrate(12); }
+      else { good++; AudioSys.firecracker(nowAudio()+0.01, 0.8); vibrate(8); }
+
+      combo++;
+      maxCombo = Math.max(maxCombo, combo);
+
+      // 分数：基础 + 连击加成
+      const add = Math.floor(base + combo*2);
+      score += add;
+
+      setJudge(type);
+      spawnBurst(type);
+
+      updateHUD();
+    }
+
+    function registerMiss(type){
+      miss++;
+      combo = 0;
+      setJudge(type);
+      // 轻微“哑火”反馈
+      if(AudioSys.isOn()){
+        AudioSys.clickSound(nowAudio()+0.01);
+      }
+      updateHUD();
+    }
+
+    function spawnBurst(type){
+      // 在鞭炮位置爆一波粒子
+      const x = W*0.5;
+      const y = H*0.62;
+      const colors = type==="Perfect"
+        ? ["rgba(251,191,36,.95)","rgba(245,158,11,.95)","rgba(255,247,237,.90)"]
+        : ["rgba(245,158,11,.90)","rgba(255,247,237,.80)"];
+      const n = type==="Perfect" ? 28 : 18;
+      for(let i=0;i<n;i++){
+        const ang = Math.random()*Math.PI*2;
+        const sp = (type==="Perfect" ? 260 : 200) + Math.random()*220;
+        const vx = Math.cos(ang)*sp;
+        const vy = Math.sin(ang)*sp - 120;
+        const life = 0.55 + Math.random()*0.45;
+        particles.push(new Particle(x, y, vx, vy, life, colors[Math.floor(Math.random()*colors.length)]));
+      }
+    }
+
+    function drawStage(t){
+      ctx.clearRect(0,0,W,H);
+
+      // 画一串鞭炮（简化图形）
+      const cx = W*0.5;
+      const top = H*0.14;
+      const ropeY = top + H*0.06;
+
+      ctx.save();
+      // rope
+      ctx.globalAlpha = 0.85;
+      ctx.strokeStyle = "rgba(255,247,237,.65)";
+      ctx.lineWidth = 3*dpr;
+      ctx.beginPath();
+      ctx.moveTo(cx - W*0.22, ropeY);
+      ctx.quadraticCurveTo(cx, ropeY - H*0.03, cx + W*0.22, ropeY);
+      ctx.stroke();
+
+      // firecrackers (rects)
+      const count = 10;
+      const startX = cx - W*0.22;
+      const gap = (W*0.44)/(count-1);
+      for(let i=0;i<count;i++){
+        const x = startX + i*gap;
+        const h = H*0.20 + (i%2)*H*0.06;
+        const y = ropeY + H*0.03;
+        // body
+        ctx.fillStyle = "rgba(185,28,28,.95)";
+        roundRect(ctx, x-10*dpr, y, 20*dpr, h, 8*dpr);
+        ctx.fill();
+        // gold cap
+        ctx.fillStyle = "rgba(251,191,36,.78)";
+        roundRect(ctx, x-10*dpr, y, 20*dpr, 10*dpr, 6*dpr);
+        ctx.fill();
+        // small highlight
+        ctx.strokeStyle = "rgba(255,247,237,.18)";
+        ctx.lineWidth = 2*dpr;
+        ctx.beginPath();
+        ctx.moveTo(x-4*dpr, y+16*dpr);
+        ctx.lineTo(x-4*dpr, y+h-10*dpr);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // 命中线（target line）
+      const targetY = H*0.62;
+      ctx.strokeStyle = "rgba(255,247,237,.35)";
+      ctx.lineWidth = 2*dpr;
+      ctx.beginPath();
+      ctx.moveTo(cx - W*0.18, targetY);
+      ctx.lineTo(cx + W*0.18, targetY);
+      ctx.stroke();
+
+      // 可视节拍圈：把未来 2 拍内的 beat 画出来，圈从大缩到命中线
+      const beat = 60/CFG.bpm;
+      const lead = CFG.leadBeats * beat;
+      const current = t;
+
+      for(let i=nextBeatIndex;i<beatTimes.length;i++){
+        const bt = beatTimes[i];
+        const dt = bt - current;
+        if(dt < - (CFG.goodMs/1000)) {
+          // 已经过了窗口还没点到：判 Miss 并推进
+          miss++;
+          combo = 0;
+          nextBeatIndex = i+1;
+          setJudge("Miss");
+          updateHUD();
+          continue;
+        }
+        if(dt > lead) break; // 太远不画
+
+        // progress: dt 从 lead -> 0
+        const p = clamp(1 - dt/lead, 0, 1);
+        const r = lerp(H*0.20, H*0.03, p); // 收缩半径
+        const alpha = 0.18 + p*0.55;
+
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = "rgba(251,191,36,.85)";
+        ctx.lineWidth = (3 + p*3) * dpr;
+        ctx.beginPath();
+        ctx.arc(cx, targetY, r, 0, Math.PI*2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      // 粒子
+      const dt = Math.min(0.033, (performance.now()-lastFrame)/1000);
+      for(let i=particles.length-1;i>=0;i--){
+        particles[i].step(dt);
+        particles[i].draw(ctx);
+        if(particles[i].life <= 0) particles.splice(i,1);
+      }
+    }
+
+    function loop(){
+      if(!running) return;
+      const now = performance.now();
+      const dt = Math.min(0.05, (now - lastFrame)/1000);
+      lastFrame = now;
+
+      const t = nowAudio();
+
+      // 倒计时
+      const remain = Math.max(0, (startAt + CFG.durationSec) - t);
+      const badge = document.getElementById("timeBadge");
+      if(badge) badge.textContent = `⏱️ ${remain.toFixed(1)}s`;
+
+      // 绘制
+      drawStage(t);
+
+      if(remain <= 0){
+        endGame();
+        return;
+      }
+
+      requestAnimationFrame(loop);
+    }
+
+    function endGame(){
+      if(!running) return;
+      running=false;
+      window.onkeydown = null;
+
+      // 年味指数：准确率 + 连击权重
+      const acc = calcAcc();
+      const vibe = clamp(Math.round(acc*0.7 + (maxCombo*3)), 0, 100);
+
+      const total = perfect + good + miss;
+      const shareText =
+`我刚玩了《此刻的春节 · 放鞭炮》🧨
+年味指数：${vibe}/100
+Score：${score}  最高连击：${maxCombo}
+Perfect：${perfect}  Good：${good}  Miss：${miss}
+
+你也来点两下，听个响。`;
+
+      renderResult({ acc, vibe, total, shareText });
+    }
+
+    function renderResult({acc, vibe, total, shareText}){
+      state="result";
+      popConfetti(70);
+
+      app.innerHTML = `
+        <div class="row">
+          <div class="badge">🎆 结算</div>
+          <div class="badge">年味指数：${vibe}/100</div>
+          <div class="badge">Accuracy：${acc}%</div>
+        </div>
+        <h1 style="margin-top:12px;">你点出了一个“${vibe>=80?"爆炸年味":"稳稳年味"}”的春节</h1>
+        <p class="muted">Score：${score} ｜最高连击：${maxCombo} ｜Perfect ${perfect} / Good ${good} / Miss ${miss}</p>
+
+        <div class="stage">
+          <div class="btns">
+            <button id="copyBtn">📋 复制分享文案</button>
+            <button id="againBtn">🔁 再来一局</button>
+            <button id="menuBtn">🏮 回到首页</button>
+          </div>
+          <p class="muted" id="msg" style="margin-top:10px;"></p>
+          <div id="fallback" style="display:none;">
+            <p class="muted" style="margin-top:10px;">自动复制失败：请手动复制下面文字</p>
+            <textarea id="ta" readonly></textarea>
+          </div>
+        </div>
+
+        <p class="muted">作者签名：愿这一刻，被好好记住。</p>
+      `;
+
+      document.getElementById("againBtn").onclick = () => { popConfetti(24); renderPlay(); };
+      document.getElementById("menuBtn").onclick = () => renderMenu();
+
+      document.getElementById("copyBtn").onclick = async () => {
+        const msg = document.getElementById("msg");
+        const fb = document.getElementById("fallback");
+        const ta = document.getElementById("ta");
+        try{
+          await navigator.clipboard.writeText(shareText);
+          fb.style.display="none";
+          msg.innerHTML = `<span style="color:#a7f3d0;font-weight:800;">已复制！</span> 去朋友圈/群里粘贴就行。`;
+        }catch(e){
+          ta.value = shareText;
+          fb.style.display="block";
+          msg.textContent = "复制失败（浏览器权限限制）。已展开手动复制框。";
+          setTimeout(()=>{ ta.focus(); ta.select(); }, 80);
+        }
+      };
+    }
+
+    // helpers
+    function lerp(a,b,t){ return a + (b-a)*t; }
+    function roundRect(ctx,x,y,w,h,r){
+      const rr = Math.min(r, w/2, h/2);
+      ctx.beginPath();
+      ctx.moveTo(x+rr, y);
+      ctx.arcTo(x+w, y, x+w, y+h, rr);
+      ctx.arcTo(x+w, y+h, x, y+h, rr);
+      ctx.arcTo(x, y+h, x, y, rr);
+      ctx.arcTo(x, y, x+w, y, rr);
+      ctx.closePath();
+    }
+
+    // 启动
+    renderMenu();
+  </script>
+</body>
+</html>
